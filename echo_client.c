@@ -21,6 +21,7 @@ int main(int argc, char **argv)
 	struct	hostent		*hp;
 	struct	sockaddr_in server;
 	char	*host, *bp, rbuf[BUFLEN], buf[BUFLEN];
+	setvbuf(stdout, NULL, _IONBF, 0); /*Make stdout unbuffered*/
 
 	switch(argc){
 	case 2:
@@ -58,6 +59,7 @@ int main(int argc, char **argv)
 	  exit(1);
 	}
 
+	printf("Messages recieved from server: \n");
 	while(n=read(sd, buf, BUFLEN)){ /* Read message from server */
 	  write(1, buf, n);	/* Print message read from server */
 	}
