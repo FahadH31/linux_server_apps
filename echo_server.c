@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 {
 	int 	sd, new_sd, client_len, port;
 	struct	sockaddr_in server, client;
-
+	
 	switch(argc){
 	case 1:
 		port = SERVER_TCP_PORT;
@@ -77,11 +77,11 @@ int main(int argc, char **argv)
 /*	echod program	*/
 int echod(int sd)
 {
-	char	*bp, buf[BUFLEN];
+	char	*bp, sbuf[BUFLEN];
 	int 	n, bytes_to_read;
 
-	while(n = read(sd, buf, BUFLEN)) 
-		write(sd, buf, n);
+	while(n = read(0, sbuf, BUFLEN)) /* Get User Message */
+		write(sd, sbuf, n);	 /* Send it to the client */
 	close(sd);
 
 	return(0);
