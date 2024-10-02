@@ -20,6 +20,7 @@ int main(int argc, char **argv)
 {
 	int 	sd, new_sd, client_len, port;
 	struct	sockaddr_in server, client;
+	setvbuf(stdout, NULL, _IONBF, 0); /*Make stdout unbuffered*/
 	
 	switch(argc){
 	case 1:
@@ -80,6 +81,7 @@ int echod(int sd)
 	char	*bp, sbuf[BUFLEN];
 	int 	n, bytes_to_read;
 
+	printf("Send messages to client:\n");
 	while(n = read(0, sbuf, BUFLEN)) /* Get User Message */
 		write(sd, sbuf, n);	 /* Send it to the client */
 	close(sd);
