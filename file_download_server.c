@@ -1,4 +1,3 @@
-/* A simple echo server using TCP */
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/unistd.h>
@@ -8,12 +7,13 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 #include <strings.h>
+#include <sys/stat.h>
 
+#define SERVER_TCP_PORT 3000	/* Default port */
+#define BUFLEN		256	/* Buffer length */
+#define PACKETLENGTH	100	/* Packet length */
 
-#define SERVER_TCP_PORT 3000	/* well-known port */
-#define BUFLEN		256	/* buffer length */
-
-int echod(int);
+int echod(int);			
 void reaper(int);
 
 int main(int argc, char **argv)
@@ -74,18 +74,50 @@ int main(int argc, char **argv)
 	}
 }
 
-/*	echod program	*/
+/*	echod function	*/
 int echod(int sd)
 {
-	char	*bp, buf[BUFLEN];
-	int 	n, bytes_to_read;
+    char buf[BUFLEN];       // Buffer to store incoming data
+    int n;                  // Number of bytes read
 
-	while(n = read(sd, buf, BUFLEN)) 
-		write(sd, buf, n);
-	close(sd);
+    // Read filename from client
+    if ((n = read(sd, buf, BUFLEN)) > 0) {
+        buf[n] = '\0';      // Null-terminate buffer content to make it a string
 
-	return(0);
+        // Open file with the name received from the client
+        FILE *file = fopen(buf, "r"); // Open in read mode
+        if (file == NULL) {
+            perror("Error opening file");
+            write(sd, "Error: Could not open file\n", 26);
+        } 
+        else {
+            // Get file size
+            struct stat file_stat;
+            if (stat(buf, &file_stat) == 0) {
+                // File size should be a minimum of 100 bytes
+                if (file_stat.st_size >= 100) {
+                    write(sd, "File is being sent...\n", 22);
+
+                    // Read file in chunks (of length 100 bytes each) and send back to client
+                    while ((n = fread(buf, 1, PACKETLENGTH, file)) > 0) {
+                        write(sd, buf, n);
+                    }
+                } 
+                else {
+                    write(sd, "Error: File size is less than 100 bytes.\n", 41);
+                }
+            } 
+            else {
+                write(sd, "Error: Could not retrieve file information.\n", 44);
+            }
+            fclose(file);
+        }
+    }
+
+    close(sd); // Close the connection
+    return 0;
 }
+
 
 /*	reaper		*/
 void	reaper(int sig)
