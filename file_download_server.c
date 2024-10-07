@@ -88,7 +88,7 @@ int echod(int sd)
         FILE *file = fopen(buf, "r"); // Open in read mode
         if (file == NULL) {
             perror("Error opening file");
-            write(sd, "Error: Could not open file\n", 26);
+            write(sd, "Error: Could not open file.\n", 28);
         } 
         else {
             // Get file size
@@ -96,7 +96,6 @@ int echod(int sd)
             if (stat(buf, &file_stat) == 0) {
                 // File size should be a minimum of 100 bytes
                 if (file_stat.st_size >= 100) {
-                    write(sd, "File is being sent...\n", 22);
 
                     // Read file in chunks (of length 100 bytes each) and send back to client
                     while ((n = fread(buf, 1, PACKETLENGTH, file)) > 0) {
@@ -114,7 +113,7 @@ int echod(int sd)
         }
     }
 
-    close(sd); // Close the connection
+    close(sd);
     return 0;
 }
 
